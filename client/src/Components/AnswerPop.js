@@ -68,7 +68,6 @@ function AnswerPop({ onClose, que, queId }) {
 
       if (response.ok) {
         setContent("");
-        // Fetch and update answers after successfully posting
         fetchAnswers();
       }
 
