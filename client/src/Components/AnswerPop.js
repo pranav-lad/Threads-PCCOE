@@ -139,14 +139,10 @@ function AnswerPop({ onClose, que, queId }) {
           <button onClick={onClose}>Close</button>
         </div>
         <div>
-          {/* Render the existing answers */}
+          {/* Render the newly created answer */}
           {answers.map((answer, index) => (
             <AnsPost key={index} props={answer} />
           ))}
-          {/* Render the newly created answer */}
-          {answers.length > 0 && (
-            <AnsPost key={answers.length} props={answers[answers.length - 1]} />
-          )}
         </div>
       </div>
     </div>

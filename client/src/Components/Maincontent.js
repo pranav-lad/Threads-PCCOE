@@ -5,15 +5,19 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import "./Write.css"; // Import custom CSS file for styling
 import Sidebar from "./Sidebar";
-import Navbar from "./Navbar";
+import "./Navbar.css";
+import ProfilePopup from "./ProfilePopup";
 import SettingsPopup from "./SettingsPopup";
 
 export default function Maincontent() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [searchtext, setsearchtext] = useState("");
+  const [loading, setLoading] = useState(true); // Add loading state
 
   const handleItemClick = () => {
     setIsSettingsOpen(false);
   };
+
   const handleItemClickSetting = () => {
     setIsSettingsOpen(true);
   };
@@ -22,8 +26,8 @@ export default function Maincontent() {
     setIsSettingsOpen(false);
   };
 
-  // from backend
   const [posts, setPosts] = useState([]);
+  const [filteredPosts, setFilteredPosts] = useState([]);
 
   useEffect(() => {
     // Fetch the latest 5 questions from the backend API
@@ -38,30 +42,27 @@ export default function Maincontent() {
       if (response.ok) {
         const questions = await response.json();
         setPosts(questions);
+        filterPosts();
       } else {
         console.error("Error fetching latest questions:", response.status);
       }
     } catch (error) {
       console.error("Error fetching latest questions:", error);
+    } finally {
+      // Set loading to false once the data is fetched
+      setLoading(false);
     }
   };
-  // console.log(posts);
-  // console.log(posts._id);
-
-  // write post
 
   const [content, setContent] = useState("");
   const [tag, setTag] = useState("TAG");
-  const [user, setUserid] = useState({}); // Initialize to null
+  const [user, setUserid] = useState({});
 
   useEffect(() => {
-    // Check if the token exists in the local storage
     const token = localStorage.getItem("token");
     if (token) {
       try {
-        // Decode the token to get the payload
         const payload = JSON.parse(atob(token.split(".")[1]));
-        // Extract the userid from the payload
         const user = {
           userid: payload._id,
           username: payload.username,
@@ -69,7 +70,6 @@ export default function Maincontent() {
         };
         setUserid(user);
         console.log(payload);
-
         console.log("User ID:", user);
       } catch (error) {
         console.error("Error decoding token:", error);
@@ -79,7 +79,10 @@ export default function Maincontent() {
 
   const handleChange = (value) => {
     setContent(value);
-    // console.log(value);
+  };
+
+  const handleSearchChange = (e) => {
+    setsearchtext(e.target.value);
   };
 
   const handleQuestion = async (event) => {
@@ -99,7 +102,7 @@ export default function Maincontent() {
       };
       console.log("Question data: ", questionData);
       const response = await fetch(
-        `http:/localhost:3001/api/questionRoute/addque/${user.userid}`,
+        `http://localhost:3001/api/questionRoute/addque/${user.userid}`,
         {
           method: "POST",
           headers: {
@@ -115,25 +118,38 @@ export default function Maincontent() {
         showSuccessMessage();
         setContent("");
         setTag("Tag");
+        fetchLatestQuestions();
       } else {
         console.error("Error posting the question:", response.status);
       }
     } catch (error) {
-      console.error("Error posting the question:", error);
+      console.error(error);
     }
-
-    fetchLatestQuestions();
   };
 
   const showSuccessMessage = () => {
     const successMessage = document.getElementById("success-message");
     successMessage.style.display = "block";
 
-    // Hide the message after 3 seconds
     setTimeout(() => {
       successMessage.style.display = "none";
     }, 3000);
   };
+
+  const filterPosts = () => {
+    if (!searchtext) {
+      setFilteredPosts(posts);
+    } else {
+      const filtered = posts.filter((post) =>
+        post.content.toLowerCase().includes(searchtext.toLowerCase())
+      );
+      setFilteredPosts(filtered);
+    }
+  };
+
+  useEffect(() => {
+    filterPosts();
+  }, [searchtext, posts]);
 
   const modules = {
     toolbar: [
@@ -143,7 +159,7 @@ export default function Maincontent() {
       ["link", "image"],
     ],
   };
-  // removed strike and clean option
+
   const formats = [
     "header",
     "bold",
@@ -155,10 +171,29 @@ export default function Maincontent() {
     "image",
   ];
 
-  // return
   return (
     <>
-      <Navbar />
+      <div className="Navbar">
+        <p className="logo">
+          <img
+            src="https://png.pngtree.com/element_our/sm/20180518/sm_5afec7f1592f4.jpg"
+            width="30px"
+            alt="logo"
+          />{" "}
+          Threads PCCOE
+        </p>
+        <div className="search">
+          <input
+            onChange={handleSearchChange}
+            value={searchtext}
+            placeholder="Search..."
+          />
+          <img src="https://www.nicepng.com/png/detail/965-9653559_search-icon-circle.png" />
+        </div>
+        <div className="right">
+          <ProfilePopup />
+        </div>
+      </div>
       <div className="the-total-page">
         <Sidebar
           handleItemClick={handleItemClick}
@@ -176,7 +211,12 @@ export default function Maincontent() {
               id="success-message"
               className="alert alert-success"
               role="alert"
-              style={{ display: "none" }}
+              style={{
+                display: "none",
+                backgroundColor: "green",
+                color: "white",
+                padding: "5px",
+              }}
             >
               Question added successfully!
             </div>
@@ -190,16 +230,24 @@ export default function Maincontent() {
             />
           </div>
 
-          {posts.map((post) => (
-            <Post
-              key={post._id}
-              content={post.content}
-              username={post.userName}
-              votes={post.votes}
-              email={post.email}
-              queId={post._id}
-            />
-          ))}
+          {loading ? (
+            // Display a loader while fetching data
+            <div className="loader">
+              <br></br>
+              <h3>Loading .....</h3>
+            </div>
+          ) : (
+            filteredPosts.map((post) => (
+              <Post
+                key={post._id}
+                content={post.content}
+                username={post.userName}
+                votes={post.votes}
+                email={post.email}
+                queId={post._id}
+              />
+            ))
+          )}
         </div>
       </div>
       {isSettingsOpen && <SettingsPopup handleClose={handleClose} />}
