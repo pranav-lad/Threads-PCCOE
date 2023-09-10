@@ -8,11 +8,29 @@ import Sidebar from "./Sidebar";
 import "./Navbar.css";
 import ProfilePopup from "./ProfilePopup";
 import SettingsPopup from "./SettingsPopup";
+import Select from "react-select";
+import makeAnimated from "react-select/animated"; // Import the animated module
+
+const animatedComponents = makeAnimated(); // Create animated components for react-select
 
 export default function Maincontent() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [searchtext, setsearchtext] = useState("");
-  const [loading, setLoading] = useState(true); // Add loading state
+  const [searchtext, setSearchText] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [selectedTags, setSelectedTags] = useState([]);
+  const [selectedFilterTag, setSelectedFilterTag] = useState(null); // New state variable for tag filtering
+  const [content, setContent] = useState("");
+  const [user, setUserid] = useState({});
+  const [successMessage, setSuccessMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
+
+  const tagOptions = [
+    { value: "Exams", label: "Exams" },
+    { value: "Sports", label: "Sports" },
+    { value: "Anantya", label: "Anantya" },
+    { value: "Computer", label: "Computer" },
+    { value: "Mechanical", label: "Mechanical" },
+  ];
 
   const handleItemClick = () => {
     setIsSettingsOpen(false);
@@ -30,7 +48,6 @@ export default function Maincontent() {
   const [filteredPosts, setFilteredPosts] = useState([]);
 
   useEffect(() => {
-    // Fetch the latest 5 questions from the backend API
     fetchLatestQuestions();
   }, []);
 
@@ -49,14 +66,9 @@ export default function Maincontent() {
     } catch (error) {
       console.error("Error fetching latest questions:", error);
     } finally {
-      // Set loading to false once the data is fetched
       setLoading(false);
     }
   };
-
-  const [content, setContent] = useState("");
-  const [tag, setTag] = useState("TAG");
-  const [user, setUserid] = useState({});
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -82,7 +94,16 @@ export default function Maincontent() {
   };
 
   const handleSearchChange = (e) => {
-    setsearchtext(e.target.value);
+    setSearchText(e.target.value);
+  };
+
+  const handleTagChange = (selectedOptions) => {
+    setSelectedTags(selectedOptions);
+  };
+
+  const handleFilterTagChange = (selectedOption) => {
+    setSelectedFilterTag(selectedOption);
+    filterPostsByTag(selectedOption);
   };
 
   const handleQuestion = async (event) => {
@@ -94,11 +115,21 @@ export default function Maincontent() {
         return;
       }
 
+      if (selectedTags.length === 0) {
+        setErrorMessage("Please select at least one tag.");
+        setTimeout(() => {
+          setErrorMessage(null);
+        }, 3000);
+        return;
+      }
+
+      const tagsString = selectedTags.map((tag) => tag.value).join(" ");
+
       const questionData = {
         userName: user.username,
         email: user.email,
         content,
-        tag,
+        tag: tagsString,
       };
       console.log("Question data: ", questionData);
       const response = await fetch(
@@ -115,25 +146,33 @@ export default function Maincontent() {
       if (response.ok) {
         const question = await response.json();
         console.log("Question posted successfully:", question);
-        showSuccessMessage();
+        setSuccessMessage("Question added successfully!");
+        setTimeout(() => {
+          setSuccessMessage(null);
+        }, 3000);
         setContent("");
-        setTag("Tag");
+        setSelectedTags([]);
+        setSelectedFilterTag(null); // Clear the filter tag selection
         fetchLatestQuestions();
       } else {
         console.error("Error posting the question:", response.status);
+        setErrorMessage("Error posting the question. Please try again.");
+        setTimeout(() => {
+          setErrorMessage(null);
+        }, 3000);
       }
     } catch (error) {
       console.error(error);
+      setErrorMessage("An error occurred. Please try again later.");
+      setTimeout(() => {
+        setErrorMessage(null);
+      }, 3000);
     }
   };
 
-  const showSuccessMessage = () => {
-    const successMessage = document.getElementById("success-message");
-    successMessage.style.display = "block";
-
-    setTimeout(() => {
-      successMessage.style.display = "none";
-    }, 3000);
+  const clearMessages = () => {
+    setSuccessMessage(null);
+    setErrorMessage(null);
   };
 
   const filterPosts = () => {
@@ -144,6 +183,17 @@ export default function Maincontent() {
         post.content.toLowerCase().includes(searchtext.toLowerCase())
       );
       setFilteredPosts(filtered);
+    }
+  };
+
+  const filterPostsByTag = (selectedTag) => {
+    if (selectedTag) {
+      const filtered = posts.filter((post) =>
+        post.tag.includes(selectedTag.value)
+      );
+      setFilteredPosts(filtered);
+    } else {
+      filterPosts();
     }
   };
 
@@ -189,7 +239,24 @@ export default function Maincontent() {
             placeholder="Search..."
           />
           <img src="https://www.nicepng.com/png/detail/965-9653559_search-icon-circle.png" />
+          <div>
+            <Select
+              options={tagOptions}
+              value={selectedFilterTag}
+              onChange={handleFilterTagChange}
+              isClearable
+              placeholder="Filter by tag"
+              styles={{
+                control: (provided) => ({
+                  ...provided,
+                  width: "150px",
+                }),
+              }}
+            />
+          </div>
         </div>
+        {/* Filter posts by tag */}
+
         <div className="right">
           <ProfilePopup />
         </div>
@@ -207,19 +274,34 @@ export default function Maincontent() {
                 +
               </button>
             </div>
-            <div
-              id="success-message"
-              className="alert alert-success"
-              role="alert"
-              style={{
-                display: "none",
-                backgroundColor: "green",
-                color: "white",
-                padding: "5px",
-              }}
-            >
-              Question added successfully!
-            </div>
+            {successMessage && (
+              <div
+                className="alert alert-success"
+                role="alert"
+                style={{
+                  backgroundColor: "green",
+                  color: "white",
+                  padding: "5px",
+                  marginBottom: "10px",
+                }}
+              >
+                {successMessage}
+              </div>
+            )}
+            {errorMessage && (
+              <div
+                className="alert alert-danger"
+                role="alert"
+                style={{
+                  backgroundColor: "red",
+                  color: "white",
+                  padding: "5px",
+                  marginBottom: "10px",
+                }}
+              >
+                {errorMessage}
+              </div>
+            )}
             <ReactQuill
               value={content}
               onChange={handleChange}
@@ -228,10 +310,18 @@ export default function Maincontent() {
               placeholder="Ask a question..."
               className="quora-editor"
             />
+            <Select
+              components={animatedComponents}
+              options={tagOptions}
+              isMulti
+              value={selectedTags}
+              onChange={handleTagChange}
+              placeholder="Select tags"
+              onFocus={clearMessages}
+            />
           </div>
 
           {loading ? (
-            // Display a loader while fetching data
             <div className="loader">
               <br></br>
               <h3>Loading .....</h3>
