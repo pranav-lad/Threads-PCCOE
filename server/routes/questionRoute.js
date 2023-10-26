@@ -22,7 +22,7 @@ router.get("/answercontent/:questionId", async (req, res) => {
 
     const answerContentsArray = question.answers.map((answer) => {
       return {
-        content: answer.content,
+        answerContent: answer.content, // Renamed from "content" to "answerContent"
         user: answer.user, // Populated user details with username and email
         likes: answer.usersWhoLike.length, // Number of likes
       };
@@ -30,8 +30,14 @@ router.get("/answercontent/:questionId", async (req, res) => {
 
     // Reverse the order of the array
     const reversedArray = answerContentsArray.reverse();
+    const contentData = {
+      questionContent: question.content,
+      answers: reversedArray,
+    };
 
-    res.status(200).json(reversedArray);
+    res.status(200).json({
+      contentData,
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

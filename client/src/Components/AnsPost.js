@@ -8,6 +8,7 @@ function AnsPost({ props }) {
   const [isbookmarked, setIsbookmarked] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [isLoading, setIsLoading] = useState(true); // Add loading state
+  console.log(props);
 
   useEffect(() => {
     // Simulate loading for 2 seconds (you can replace this with actual data fetching)
@@ -20,6 +21,8 @@ function AnsPost({ props }) {
 
   const openPopup = () => {
     setShowPopup(true);
+    // const QuestionUrl = `/QuestionAnswer/${tutorProfile._id}`;
+    // window.open(QuestionUrl, "_blank");
   };
 
   const closePopup = () => {
@@ -75,7 +78,7 @@ function AnsPost({ props }) {
 
           <div
             className="lower"
-            dangerouslySetInnerHTML={{ __html: props.content }}
+            dangerouslySetInnerHTML={{ __html: props.answerContent }}
           ></div>
           <div>
             <div className="bar">

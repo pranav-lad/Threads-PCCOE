@@ -1,9 +1,14 @@
 import React, { useEffect, useState } from "react";
 import ReactQuill from "react-quill";
 import AnsPost from "./AnsPost";
+import usePagination from "@mui/material/usePagination/usePagination";
+import { useParams } from "react-router-dom";
 
-function AnswerPop({ onClose, que, queId }) {
-  console.log(queId);
+function AnswerPop() {
+  // console.log(queId);
+  const { queId } = useParams();
+  // const { que } = useParams();
+  const [que, setQue] = useState("");
   const [answers, setAnswers] = useState([]);
 
   useEffect(() => {
@@ -19,12 +24,14 @@ function AnswerPop({ onClose, que, queId }) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       const data = await response.json();
-      setAnswers(data);
+      console.log(data.contentData.answers);
+      setQue(data.contentData.questionContent);
+      setAnswers(data.contentData.answers);
     } catch (error) {
       console.error("Error fetching answers:", error);
     }
   };
-  console.log(answers);
+  // console.log(answers);
 
   const [content, setContent] = useState("");
   const [user, setUserid] = useState({}); // Initialize to null
@@ -135,9 +142,9 @@ function AnswerPop({ onClose, que, queId }) {
             </button>
           </span>
         </div>
-        <div className="button">
+        {/* <div className="button">
           <button onClick={onClose}>Close</button>
-        </div>
+        </div> */}
         <div>
           {/* Render the newly created answer */}
           {answers.map((answer, index) => (

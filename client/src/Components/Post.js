@@ -10,8 +10,14 @@ export default function Post(props) {
 
   const [showPopup, setShowPopup] = useState(false);
 
-  const openPopup = () => {
-    setShowPopup(true);
+  // const openPopup = () => {
+  //   setShowPopup(true);
+  // };
+
+  const handleQuestionClick = (tutorProfile) => {
+    // setSelectedTutorProfile(tutorProfile);
+    const QuestionUrl = `/questionAnswer/${queId}`;
+    window.open(QuestionUrl, "_blank");
   };
 
   const closePopup = () => {
@@ -80,12 +86,12 @@ export default function Post(props) {
               width="20px"
               style={{ marginRight: "10px" }}
             />
-            <span onClick={openPopup}>Reply</span>
+            <span onClick={handleQuestionClick}>Reply</span>
           </div>
         </div>
-        {showPopup && (
+        {/* {showPopup && (
           <AnswerPop onClose={closePopup} que={content} queId={queId} />
-        )}
+        )} */}
       </div>
     </div>
   );
