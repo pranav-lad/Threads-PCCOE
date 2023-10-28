@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./LoginSignupPage.css";
-import firebase from './firebase';
-import { signInWithPopup } from 'firebase/auth';
-import { GoogleAuthProvider } from 'firebase/auth';
-import google from './googlelogo.png';
+import firebase from "./firebase";
+import { signInWithPopup } from "firebase/auth";
+import { GoogleAuthProvider } from "firebase/auth";
+import google from "./googlelogo.png";
 // Import the LoginSuccessPopup component
 import LoginSuccessPopup from "./LoginSuccessPopup";
 
@@ -26,7 +26,7 @@ function LoginSignup() {
     try {
       const result = await signInWithPopup(firebase.auth(), provider);
       console.log("result", result);
-      console.log('Logged in successfully');
+      console.log("Logged in successfully");
       navigate("/home");
 
       // Show the LoginSuccessPopup after successful login
@@ -36,19 +36,18 @@ function LoginSignup() {
     }
   }
   // function to validate email
-  const validateEmail = (email) =>{
-      const domain = "pccoepune.org";
-                    const emailParts =email.split('@');
-                    if (emailParts.length === 2 && emailParts[1].toLowerCase() === domain) {
-                      setEmail(email);
-                      return true;
-                    }else{
-                      console.log("Use only pccoepune.org email, ex. user@pccoepune.org");
-                      // alert("wrong email");
-                      return false;
-                    }
-
-  }
+  const validateEmail = (email) => {
+    const domain = "pccoepune.org";
+    const emailParts = email.split("@");
+    if (emailParts.length === 2 && emailParts[1].toLowerCase() === domain) {
+      setEmail(email);
+      return true;
+    } else {
+      console.log("Use only pccoepune.org email, ex. user@pccoepune.org");
+      // alert("wrong email");
+      return false;
+    }
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -65,7 +64,7 @@ function LoginSignup() {
           },
           body: JSON.stringify(loginData),
         });
-        
+
         const data = await response.json();
         // If login was successful and a redirect URL is provided
         if (response.ok) {
@@ -87,7 +86,7 @@ function LoginSignup() {
     } else {
       // Handle signup
       const signupData = { username, email, password };
-      if(validateEmail(email)){
+      if (validateEmail(email)) {
         try {
           const response = await fetch("http://localhost:3001/api/signup", {
             method: "POST",
@@ -99,13 +98,11 @@ function LoginSignup() {
         } catch (error) {
           console.log(error);
         }
-      }
-      else{
+      } else {
         alert("wrong email");
       }
       window.location.reload();
-      }
-      
+    }
   };
 
   // State to control the visibility of LoginSuccessPopup
@@ -113,17 +110,16 @@ function LoginSignup() {
 
   return (
     <div className="container">
-
       <div className="form-card">
-      <div className="logo-container">
-        <img
-          src="https://png.pngtree.com/element_our/sm/20180518/sm_5afec7f1592f4.jpg"
-          width="30px"
-          alt="Logo"
-          className="logo"
-        />
-        Threads PCCOE
-      </div>
+        <div className="logo-container">
+          <img
+            src="https://png.pngtree.com/element_our/sm/20180518/sm_5afec7f1592f4.jpg"
+            width="30px"
+            alt="Logo"
+            className="logo"
+          />
+          Threads PCCOE
+        </div>
         <div className="form-tabs">
           <button
             className={isLoginForm ? "active" : "notactive"}
@@ -146,7 +142,7 @@ function LoginSignup() {
                 placeholder="Username"
                 value={email}
                 onChange={(e) => {
-                    setEmail(e.target.value);
+                  setEmail(e.target.value);
                 }}
               />
               <input
@@ -173,9 +169,9 @@ function LoginSignup() {
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value);
-              }}
+                }}
               />
-              
+
               <input
                 type="password"
                 name="password"
@@ -189,12 +185,16 @@ function LoginSignup() {
         </form>
         <div className="google-login">
           <span>Or</span>
-          <button onClick={login_with_google}><img className="googlelogo" src={google} /> Google</button>
+          <button onClick={login_with_google}>
+            <img className="googlelogo" src={google} /> Google
+          </button>
         </div>
       </div>
 
       {/* Show the LoginSuccessPopup if showLoginSuccessPopup is true */}
-      {showLoginSuccessPopup && <LoginSuccessPopup /> && alert('sign up successful') && window.location.reload()}
+      {showLoginSuccessPopup && <LoginSuccessPopup /> &&
+        alert("sign up successful") &&
+        window.location.reload()}
     </div>
   );
 }

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./Maincontent.css";
-import Post from "./Post.js";
-import ReactQuill from "react-quill";
+import Homepage from "./HomePage";
 import "react-quill/dist/quill.snow.css";
 import "./Write.css"; // Import custom CSS file for styling
 import Sidebar from "./Sidebar";
@@ -266,79 +265,31 @@ export default function Maincontent() {
           handleItemClick={handleItemClick}
           handleItemClickSetting={handleItemClickSetting}
         />
-        <div className="maincontent">
-          <div className="write-container">
-            <div className="quora-header">
-              <span className="quora-ask-question">Ask a Question</span>
-              <button className="quora-submit-btn" onClick={handleQuestion}>
-                +
-              </button>
-            </div>
-            {successMessage && (
-              <div
-                className="alert alert-success"
-                role="alert"
-                style={{
-                  backgroundColor: "green",
-                  color: "white",
-                  padding: "5px",
-                  marginBottom: "10px",
-                }}
-              >
-                {successMessage}
-              </div>
-            )}
-            {errorMessage && (
-              <div
-                className="alert alert-danger"
-                role="alert"
-                style={{
-                  backgroundColor: "red",
-                  color: "white",
-                  padding: "5px",
-                  marginBottom: "10px",
-                }}
-              >
-                {errorMessage}
-              </div>
-            )}
-            <ReactQuill
-              value={content}
-              onChange={handleChange}
-              modules={modules}
-              formats={formats}
-              placeholder="Ask a question..."
-              className="quora-editor"
-            />
-            <Select
-              components={animatedComponents}
-              options={tagOptions}
-              isMulti
-              value={selectedTags}
-              onChange={handleTagChange}
-              placeholder="Select tags"
-              onFocus={clearMessages}
-            />
-          </div>
 
-          {loading ? (
-            <div className="loader">
-              <br></br>
-              <h3>Loading .....</h3>
-            </div>
-          ) : (
-            filteredPosts.map((post) => (
-              <Post
-                key={post._id}
-                content={post.content}
-                username={post.userName}
-                votes={post.votes}
-                email={post.email}
-                queId={post._id}
-              />
-            ))
-          )}
-        </div>
+        <Homepage
+          isSettingsOpen={isSettingsOpen}
+          searchtext={searchtext}
+          loading={loading}
+          selectedTags={selectedTags}
+          selectedFilterTag={selectedFilterTag}
+          content={content}
+          user={user}
+          successMessage={successMessage}
+          errorMessage={errorMessage}
+          tagOptions={tagOptions}
+          handleItemClick={handleItemClick}
+          handleItemClickSetting={handleItemClickSetting}
+          handleClose={handleClose}
+          posts={posts}
+          filteredPosts={filteredPosts}
+          fetchLatestQuestions={fetchLatestQuestions}
+          handleChange={handleChange}
+          handleSearchChange={handleSearchChange}
+          handleTagChange={handleTagChange}
+          handleFilterTagChange={handleFilterTagChange}
+          handleQuestion={handleQuestion}
+          clearMessages={clearMessages}
+        />
       </div>
       {isSettingsOpen && <SettingsPopup handleClose={handleClose} />}
     </>
